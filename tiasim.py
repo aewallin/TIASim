@@ -87,7 +87,7 @@ class OPA858():
         https://www.ti.com/lit/ds/symlink/opa858.pdf
     """
     def __init__(self):
-        self.AOL_gain = 9645.80643846  
+        self.AOL_gain =  6645.80643846   # pow(10,66.0/20.0)
         self.AOL_bw = 1091348.67318369
         self.GBWP = 5.5e9
         
@@ -98,6 +98,8 @@ class OPA858():
     def voltage_noise(self,f):
         """ amplifier input voltage noise in V/sqrt(Hz) """
         # FIXME, not a good fit to the datasheet
+        # fit vnoise:  [  2.15623045e-09   9.28064032e-07]
+
         a0 = 2.5e-9
         a1 = 72e-8
          
