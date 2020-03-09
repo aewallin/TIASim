@@ -198,11 +198,11 @@ class OPA847():
         
     def voltage_noise(self,f):
         """ amplifier input voltage noise in V/sqrt(Hz) """
-        return 0.85e-9
+        return numpy.array(len(f)*[0.85e-9])
         
     def current_noise(self,f):
         """ amplifier input current noise in A/sqrt(Hz) """
-        return 2.7e-12
+        return numpy.array(len(f)*[2.7e-12])
     
     def input_capacitance(self):
         cm = 1.7e-12
