@@ -18,5 +18,10 @@ http://www.ti.com/lit/ds/symlink/opa657.pdf
 
 ![opa657-image](doc/opa657.png)
 
+### OPA847
+http://www.ti.com/lit/ds/symlink/opa847.pdf
+![opa847-image](doc/opa847.png)
+
 ### OPA855
 http://www.ti.com/lit/ds/symlink/opa855.pdf
+
