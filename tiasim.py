@@ -211,11 +211,28 @@ class OPA847():
         diff= 2.0e-12
         return cm+diff 
 
-class S5973():
+class S5971():
     """
+        Hamamatsu Si PIN Photodiode
+        1.2 mm diameter detector
         https://www.hamamatsu.com/resources/pdf/ssd/s5971_etc_kpin1025e.pdf
     """
     def __init__(self):
+        self.capacitance = 4e-12 # at VR = 5 V
+        self.responsivity = 0.4 # A/W
+        
+    def current(self, P):
+        """ photocurrent (A) produced by input optical power P """
+        return self.responsivity*P
+        
+class S5973():
+    """
+        Hamamatsu Si PIN Photodiode
+        0.4 mm diameter detector
+        https://www.hamamatsu.com/resources/pdf/ssd/s5971_etc_kpin1025e.pdf
+    """
+    def __init__(self):
+        # capacitance at Vr = 3.3V
         self.capacitance = 1.6e-12
         self.responsivity = 0.4 # A/W
     def current(self, P):
@@ -358,14 +375,16 @@ class TIA():
         return c,n,c-n
 
 if __name__ == "__main__":
-    P = 5*25e-6
+    P = 2e-6
     #R_F = 1e3
-    R_F = 1.5e3 # 4.6e3
-    C_F = 0.1e-12
+    R_F = 1e6 #1.5e3 # 4.6e3
+    C_F = 1e-12
     #tia = TIA( OPA847(), S5973(), R_F, C_F ) # shot noise limit 200uW, 1kOhm, 390 MHz
     #tia = TIA( IdealOpamp(), FDS015(), R_F, C_F )
-    tia = TIA( OPA859(), FDS015(), R_F  , None, 0.05e-12) 
+    #tia = TIA( OPA859(), FDS015(), R_F  , None, 0.05e-12) 
     #tia = TIA( OPA657(), S5973(), R_F  , C_F, 0.05e-12) 
+    tia = TIA( OPA657(), S5971(), R_F  , C_F, 0.05e-12) 
+    
     #tia = TIA( OPA858(), S5973(), R_F  , None, 0.25e-12) 
     #tia.C_F = 0.4e-12 # set manually
     print "P optical ", P*1e6 , " uW"
@@ -387,7 +406,7 @@ if __name__ == "__main__":
     bw = tia.bandwidth()
     plt.loglog( bw, numpy.abs(tia.ZM( bw )), 'o')
     plt.loglog( 0.1*bw, numpy.abs(tia.ZM( 0.1*bw )), 'o')
-    plt.text( bw, numpy.abs(tia.ZM( bw )), '%.1f MHz'%(bw/1e6))
+    plt.text( bw, numpy.abs(tia.ZM( bw )), '%.3f MHz'%(bw/1e6))
     plt.ylabel('Transimpedance / Ohm')
     
     ax2 = plt.twinx()
