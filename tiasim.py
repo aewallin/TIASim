@@ -16,7 +16,7 @@
     along with TIASim.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import matplotlib.pyplot as plt
+
 import numpy
 
 q=1.609e-19;    # electron charge
@@ -154,6 +154,8 @@ class OPA657():
         1.6-GHz, Low-Noise, FET-Input Operational Amplifier
         https://www.ti.com/lit/ds/symlink/opa657.pdf
         
+        4.8 nV/sqrt(Hz) voltage noise
+        1.3 fA/sqrt(Hz) current noise
         Gain of +7 stable 
     """
     def __init__(self):
@@ -374,145 +376,19 @@ class TIA():
         #print c,n
         return c,n,c-n
 
+def v_to_dbm(v_psd, RBW = 1.0, termination=True):
+    """ 
+        convert voltage noise in v/sqrt(Hz)
+        to dBm as displayed by Spectrum Analyzer
+    """
+    v2_psd = v_psd*v_psd # V^2 / Hz
+    # P = UI = U^2 / R
+    p_psd = v2_psd / 50.0 # W / Hz
+    dbm = 10.0*numpy.log10( RBW*p_psd / 1.0e-3)
+    if termination:
+        dbm = dbm - 6.0 # 50-ohm termination halves voltage, so -6dB power
+    return dbm
+        
+        
 if __name__ == "__main__":
-    P = 2e-6
-    #R_F = 1e3
-    R_F = 1e6 #1.5e3 # 4.6e3
-    C_F = 1e-12
-    #tia = TIA( OPA847(), S5973(), R_F, C_F ) # shot noise limit 200uW, 1kOhm, 390 MHz
-    #tia = TIA( IdealOpamp(), FDS015(), R_F, C_F )
-    #tia = TIA( OPA859(), FDS015(), R_F  , None, 0.05e-12) 
-    #tia = TIA( OPA657(), S5973(), R_F  , C_F, 0.05e-12) 
-    tia = TIA( OPA657(), S5971(), R_F  , C_F, 0.05e-12) 
-    
-    #tia = TIA( OPA858(), S5973(), R_F  , None, 0.25e-12) 
-    #tia.C_F = 0.4e-12 # set manually
-    print "P optical ", P*1e6 , " uW"
-    print "Photocurrent ", P*0.4, " uA"
-    print "DC signal ", R_F*P*0.4, " V"
-    
-    print "I shot %.2g A/sqrt(Hz)" % (numpy.sqrt(0.4*P*q*2.0))
-    print "R_F voltage ", tia.dc_output(P,100e3)
-    print "Bandwidth ", tia.bandwidth()/1e6, " MHz"
- 
-    print "simple bw model ", tia.bandwidth_approx()/1e6, " MHz"
-
-    f = numpy.logspace(3,9.5,100)
-    print "ZM"
-    zm = numpy.abs( tia.ZM(f) )
-    # transimpedance
-    plt.figure()
-    plt.loglog(f,zm,'-')
-    bw = tia.bandwidth()
-    plt.loglog( bw, numpy.abs(tia.ZM( bw )), 'o')
-    plt.loglog( 0.1*bw, numpy.abs(tia.ZM( 0.1*bw )), 'o')
-    plt.text( bw, numpy.abs(tia.ZM( bw )), '%.3f MHz'%(bw/1e6))
-    plt.ylabel('Transimpedance / Ohm')
-    
-    ax2 = plt.twinx()
-    ax2.loglog(f,tia.dark_noise(f),'--') 
-    ax2.loglog(f,tia.bright_noise(P, f))
-    plt.grid()
-
-    # shot-noise-ratio
-    plt.figure()
-    dark = tia.dark_noise(f)
-    bright = tia.bright_noise(P,f)
-    
-    def shot_noise_ratio_dB(fn):
-        f3db_shot = 20*numpy.log10( tia.shot_noise(P,fn) )
-        f3db_dark = 20*numpy.log10( tia.dark_noise(fn) )
-        return f3db_shot - f3db_dark 
-    
-    #plt.semilogx( f, 20*numpy.log10( bright )-20*numpy.log10(dark),'-')
-    plt.semilogx( f, shot_noise_ratio_dB(f),'-')
-    
-    plt.semilogx( tia.bandwidth(), shot_noise_ratio_dB(tia.bandwidth()) ,'o',label='f_-3dB')
-    plt.semilogx( 0.1*tia.bandwidth(), shot_noise_ratio_dB(0.1*tia.bandwidth()),'o',label='0.1*f_-3dB')
-    
-    plt.ylabel('shot-noise/amp-noise ratio / dB')
-    plt.grid()
-    
-    # output voltage noise
-    plt.figure()
-    print "amp_i"
-    amp_i = tia.amp_current_noise(f)
-    amp_v = tia.amp_voltage_noise(f)
-    john = tia.johnson_noise(f)
-    dark = tia.dark_noise(f)
-    shot = tia.shot_noise(P,f)
-    bright = tia.bright_noise(P, f)
-
-    plt.loglog(f,amp_i,label='amp i-noise')
-    plt.loglog(f,amp_v,label='amp v-noise')
-
-    plt.loglog(f,john,'-.',label='R_F Johnson')
-    plt.loglog(f,dark,label='Dark')
-    plt.loglog(f,shot,label='shot noise P=%f uW'%(P*1e6))
-
-    plt.loglog(f,bright,label='Bright')
-    plt.loglog( tia.bandwidth(), tia.dark_noise(tia.bandwidth()),'o',label='f_-3dB')
-    plt.loglog( 0.1*tia.bandwidth(), tia.dark_noise(0.1*tia.bandwidth()),'o',label='0.1*f_-3dB')
-    
-    plt.ylim((1e-9,1e-7))
-    plt.grid()
-    plt.legend()
-    
-    def v_to_dbm(v_psd, RBW = 1.0, termination=True):
-        v2_psd = v_psd*v_psd # V^2 / Hz
-        # P = UI = U^2 / R
-        p_psd = v2_psd / 50.0 # W / Hz
-        dbm = 10.0*numpy.log10( RBW*p_psd / 1.0e-3)
-        if termination:
-            dbm = dbm - 6.0 # 50-ohm termination halves voltage, so -6dB power
-        return dbm
-    
-    # load experimental data
-    d = numpy.genfromtxt('/home/anders/Dropbox/2020-01-18_circular_tia/CSV1.csv',comments='#',delimiter=',')
-    print d
-    df = d.T[0]
-    d_bright = d.T[1]
-    d_dark = d.T[2]
-    d_sa = d.T[3]
-        
-    plt.figure()
-    plt.plot(df, d_bright)
-    plt.plot(df, d_dark)
-    plt.plot(df, d_sa)
-
-    rbw = 6*3e3
-    for p in 1e-6*numpy.logspace(-1,6,6):
-        bright = v_to_dbm( tia.bright_noise(p, f), RBW = rbw)
-        plt.plot(f,bright,label='P=%.1f uW'%(p*1e6))
-        
-    plt.xlim((10e6,100e6))
-    plt.xlabel('Frequency / Hz')
-    plt.ylabel('dBm / RBW=%.1g Hz' % rbw)
-    plt.grid()
-    plt.legend()
-    plt.show()
-
-"""
-amps = [('OPA847',0.85e-9, 2.7e-12),  # V/sqrt(Hz), A/sqrt(Hz)
-       ('LMH6629',0.69e-9, 2.6e-12),  # V/sqrt(Hz), A/sqrt(Hz)
-        ('OPA657',4.8e-9, 1.3e-15)
-        ]
-        
-plt.figure()
-for a in amps:
-    plt.loglog(a[1], a[2],'o',label=a[0])
-#plt.loglog(lmh6629[0], lmh6629[1],'o',label='lmh6629')
-
-plt.loglog([1e-10, 10e-9], 2*[shot(1e-6)],'--',label='1uW')
-plt.loglog([1e-10, 10e-9], 2*[shot(10e-6)],'--',label='10uW')
-plt.loglog([1e-10, 10e-9], 2*[shot(100e-6)],'--',label='100uW')
-plt.loglog([1e-10, 10e-9], 2*[shot(1000e-6)],'--',label='1mW')
-
-plt.legend()
-
-plt.ylabel('A/sqrt(Hz)')
-plt.xlabel('V/sqrt(Hz)')
-
-plt.grid()
-plt.show()
-"""
+    pass
