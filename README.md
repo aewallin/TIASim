@@ -1,6 +1,10 @@
 # TIASim
 TIASim - Transimpedance Amplifier Simulation
 
+## References
+
+* Transimpedance Amplifiers (TIA): Choosing the Best Amplifier for the Job, http://www.ti.com.cn/cn/lit/an/snoa942a/snoa942a.pdf
+
 ## op-amps
 
 Open-loop gain, input-referred voltage and current noise, and input-capacitance are modeled for the following op-amps:

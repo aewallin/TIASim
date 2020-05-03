@@ -120,6 +120,7 @@ class OPA858():
 class OPA859():
     """
         1.8 GHz Unity-Gain Bandwidth, 3.3-nV/sqrt(Hz), FET Input Amplifier
+        https://www.ti.com/product/OPA859
     """
     def __init__(self):
         self.AOL_gain = 2152.02871113 
@@ -366,7 +367,9 @@ class TIA():
     def set_CF(self):
         """ 
             set optimum value for C_F
-            C_opt = sqrt( C_source / 2*pi*GbWP*R_F )
+            C_opt = sqrt( C_source / 2*pi*GBWP*R_F )
+            
+            design point is Q=1/sqrt(2) ~ 0.71 which is the maximally flat "Butterworth" frequency response
         """
         C_optimal = numpy.sqrt( self.C_tot / (2.0*numpy.pi*self.opamp.GBWP*self.R_F))
         if C_optimal > self.C_F_parasitic:
