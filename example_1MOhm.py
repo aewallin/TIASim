@@ -29,9 +29,10 @@ if __name__ == "__main__":
         PCB:            One-Inch-Photodetector, https://github.com/aewallin/One-Inch-Photodetector
         Opamp:          OPA657, SOT23-5
         Transimpedance: 1 MOhm
+        CF:             not installed
         Photodiode:     S5971
     """
-    P = 2e-6
+    P = 2.5e-6
     R_F = 1e6
     C_F = 0e-12
     C_parasitic = 0.05e-12
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     
     print "P optical ", P*1e6 , " uW"
     print "Photocurrent ", P*0.4, " uA"
-    print "DC signal ", R_F*P*0.4, " V"
+    print "DC signal (unterminated) ", R_F*P*0.4, " V"
     
     print "I shot %.2g A/sqrt(Hz)" % (numpy.sqrt(0.4*P*tiasim.q*2.0))
     print "R_F voltage ", tia.dc_output(P,100e3)
@@ -73,7 +74,7 @@ if __name__ == "__main__":
 
 
     # transimpedance plot
-    plt.figure()
+    plt.figure(figsize=(12,10))
     plt.loglog(f,zm,'-', label='Transimpedance')
     
     plt.loglog( bw, numpy.abs(tia.ZM( bw )), 'o',label='-3 dB BW')
@@ -81,12 +82,13 @@ if __name__ == "__main__":
     plt.text( bw, numpy.abs(tia.ZM( bw )), '%.3f MHz'%(bw/1e6))
     plt.ylabel('Transimpedance / Ohm')
     plt.xlabel('Frequency / Hz')
-    
+    plt.title('1 MOhm, 4 MHz Photodetector: OPA657 / S5791 / 1 MOhm (AW2020-05-02)')
+    plt.xlim((1e3,30e6))
     plt.legend()
     plt.grid()
     
     # output voltage noise
-    plt.figure()
+    plt.figure(figsize=(12,10))
     print "amp_i"
     amp_i = tia.amp_current_noise(f)
     amp_v = tia.amp_voltage_noise(f)
@@ -106,14 +108,16 @@ if __name__ == "__main__":
     plt.loglog( tia.bandwidth(), tia.dark_noise(tia.bandwidth()),'o',label='f_-3dB = %.3f MHz'%(bw/1e6))
     plt.loglog( 0.1*tia.bandwidth(), tia.dark_noise(0.1*tia.bandwidth()),'o',label='0.1*f_-3dB')
     
-    plt.ylim((1e-9,1e-5))
+    plt.ylim((1e-10,1e-5))
+    plt.xlim((1e3,30e6))
     plt.xlabel('Frequency / Hz')
     plt.ylabel('Output-referred voltage noise / V/sqrt(Hz)')
+    plt.title('1 MOhm, 4 MHz Photodetector: OPA657 / S5791 / 1 MOhm (AW2020-05-02)')
     plt.grid()
     plt.legend()
     
     # plot measured data and compare to model
-    plt.figure()
+    plt.figure(figsize=(12,10))
     plt.plot(df, d_bright,'o',label='Measured bright noise @ 1 VDC output')
     plt.plot(df, d_bright2,'o',label='Measured response')
     plt.plot(df, d_dark,'o',label='Measured dark')
@@ -122,13 +126,17 @@ if __name__ == "__main__":
     rbw = 10e3
     plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
     
-    for p in 1e-6*numpy.logspace(1.6, 7.2, 4):
+    resistor = tiasim.v_to_dbm( numpy.sqrt( 4*tiasim.kB*tiasim.T/R_F )*R_F, RBW = rbw )
+    plt.semilogx([f[0], f[-1]], [resistor, resistor],'--',label='R_F noise')
+    
+    
+    for p in 1e-6*numpy.logspace(-1, 7, 9):
         bright = tiasim.v_to_dbm( tia.bright_noise(p, f), RBW = rbw)
-        plt.plot(f,bright,label='TIASim P_shot =%.3g W'%(p))
+        plt.plot(f, bright, label='TIASim P_shot =%.3g W'%(p))
     
-    plt.xlim((5e4,30e6))
+    plt.xlim((1e3,30e6))
     #plt.ylim((-120,-30))
-    
+    plt.title('1 MOhm, 4 MHz Photodetector: OPA657 / S5791 / 1 MOhm (AW2020-05-02)')
     #plt.xlim((10e6,100e6))
     plt.xlabel('Frequency / Hz')
     plt.ylabel('dBm / RBW=%.1g Hz' % rbw)

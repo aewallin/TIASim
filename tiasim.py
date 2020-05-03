@@ -198,7 +198,6 @@ class OPA847():
         
     def gain(self,f):
         """ gain """
-        #return numpy.abs( self.AOL_gain / (1.0+ 1j * f/self.AOL_bw ) )
         return  self.AOL_gain / (1.0+ 1j * f/self.AOL_bw ) 
         
     def voltage_noise(self,f):
@@ -214,7 +213,12 @@ class OPA847():
         diff= 2.0e-12
         return cm+diff 
 
-class S5971():
+class Photodiode():
+    def current(self, P):
+        """ photocurrent (A) produced by input optical power P """
+        return self.responsivity*P
+        
+class S5971(Photodiode):
     """
         Hamamatsu Si PIN Photodiode
         1.2 mm diameter detector
@@ -224,25 +228,18 @@ class S5971():
         self.capacitance = 4e-12 # at VR = 5 V
         self.responsivity = 0.4 # A/W
         
-    def current(self, P):
-        """ photocurrent (A) produced by input optical power P """
-        return self.responsivity*P
-        
-class S5973():
+class S5973(Photodiode):
     """
         Hamamatsu Si PIN Photodiode
         0.4 mm diameter detector
         https://www.hamamatsu.com/resources/pdf/ssd/s5971_etc_kpin1025e.pdf
     """
     def __init__(self):
-        # capacitance at Vr = 3.3V
-        self.capacitance = 1.6e-12
-        self.responsivity = 0.4 # A/W
-    def current(self, P):
-        """ photocurrent (A) produced by input optical power P """
-        return self.responsivity*P
+        self.capacitance = 1.6e-12  # capacitance at Vr = 3.3V
+        self.responsivity = 0.4     # A/W
 
-class FDS015():
+
+class FDS015(Photodiode):
     """
         Thorlabs FDS015 Si photodiode
         https://www.thorlabs.com/thorproduct.cfm?partnumber=FDS015
@@ -254,11 +251,6 @@ class FDS015():
     def __init__(self):
         self.capacitance = 0.65e-12
         self.responsivity = 0.4
-    def current(self, P):
-        """ photocurrent produced by input optical power P """
-        return self.responsivity*P
-        
-        
 
 class TIA():
     def __init__(self, opamp, diode, R_F, C_F=None, C_F_parasitic=None):
@@ -279,12 +271,16 @@ class TIA():
         
     
     def ZF(self, f):
-        # feedback impedance R_F || C_F
+        """
+            feedback impedance ZF = R_F || C_F
+        """
         w = 2.0*numpy.pi*f
         return self.R_F / ( 1j*self.R_F*self.C_F*w + 1.0 ); 
     
     def ZM(self,f):
-        # closed loop transimpedance, Hobbs (18.15)
+        """
+            closed loop transimpedance, Hobbs (18.15)
+        """
         A = self.opamp.gain(f)
         w = 2.0*numpy.pi*f
         
@@ -294,7 +290,6 @@ class TIA():
         """
             output-referred amplifier current noise, in V/sqrt(Hz)
             computed as amplifier input-referred noise thru transimpedance
-            
         """
         return self.opamp.current_noise(f)*numpy.abs(self.ZM(f))   
  
@@ -316,11 +311,12 @@ class TIA():
     
     def shot_noise(self, P, f):
         """
-            output-referred shot noise due to optical power P, in V/sqrt(Hz)
-            shot-noise current thru transimpedance
+            output-referred shot noise in V/sqrt(Hz) due to optical power P in W
+            shot-noise current thru transimpedance.
+            
+            For the total TIA noise at power P use bright_noise()
         """
         I_PD = self.diode.current(P)
-        q=1.609e-19
         return numpy.sqrt(2.0*q*I_PD) * numpy.abs(self.ZM(f)) 
     
     def dark_noise(self, f):
@@ -348,11 +344,17 @@ class TIA():
         return I_PD*numpy.abs(self.ZM(f))
     
     def bandwidth_approx(self):
+        """
+            Simple bandwidth approximation - usually not correct
+        """
         f3db = numpy.sqrt( self.opamp.GBWP /(2*numpy.pi*self.R_F*self.C_tot))
         return f3db
         
     def bandwidth(self):
-        """ find the -3 dB bandwidth of the TIA """
+        """ 
+            The -3 dB bandwidth of the TIA
+            Found by searching for the frequency where ZM(f) = ZM(0)/sqrt(2) 
+        """
         f = numpy.logspace(1,10,1e6)
         zm = numpy.abs( self.ZM(f) )
         try:

@@ -4,6 +4,9 @@ TIASim - Transimpedance Amplifier Simulation
 ## References
 
 * Transimpedance Amplifiers (TIA): Choosing the Best Amplifier for the Job, http://www.ti.com.cn/cn/lit/an/snoa942a/snoa942a.pdf
+* Transimpedance Considerations for High-Speed Amplifiers http://www.ti.com/lit/an/sboa122/sboa122.pdf
+** RF lower than 2 kOhm -> use BJT opamp
+** RF higher than 2 kOhm -> use FET opamp
 
 ## op-amps
 
