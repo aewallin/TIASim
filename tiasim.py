@@ -242,6 +242,14 @@ class S5973():
         return self.responsivity*P
 
 class FDS015():
+    """
+        Thorlabs FDS015 Si photodiode
+        https://www.thorlabs.com/thorproduct.cfm?partnumber=FDS015
+        150 um diameter active area
+        
+        0.65 pF capacitance at Vr = 5 V
+        TO-46 package
+    """
     def __init__(self):
         self.capacitance = 0.65e-12
         self.responsivity = 0.4
