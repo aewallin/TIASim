@@ -202,11 +202,13 @@ class OPA847():
         
     def voltage_noise(self,f):
         """ amplifier input voltage noise in V/sqrt(Hz) """
-        return numpy.array(len(f)*[0.85e-9])
+        #return numpy.array(len(f)*[0.85e-9])
+        return 0.85e-9
         
     def current_noise(self,f):
         """ amplifier input current noise in A/sqrt(Hz) """
-        return numpy.array(len(f)*[2.7e-12])
+        #return numpy.array(len(f)*[2.7e-12])
+        return 2.7e-12
     
     def input_capacitance(self):
         cm = 1.7e-12
@@ -238,6 +240,15 @@ class S5973(Photodiode):
         self.capacitance = 1.6e-12  # capacitance at Vr = 3.3V
         self.responsivity = 0.4     # A/W
 
+class S905501(Photodiode):
+    """
+        Hamamatsu Si PIN Photodiode
+        0.1 mm diameter detector
+        https://www.hamamatsu.com/resources/pdf/ssd/s9055_series_kpin1065e.pdf
+    """
+    def __init__(self):
+        self.capacitance = 0.5e-12  # capacitance at Vr = 3.3V
+        self.responsivity = 0.25     # A/W
 
 class FDS015(Photodiode):
     """
