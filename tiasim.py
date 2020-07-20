@@ -185,6 +185,38 @@ class OPA657():
         diff= 4.5e-12
         return cm+diff 
 
+class OPA818():
+    """
+        OPA818 2.7-GHz, High-Voltage, FET-Input, Low Noise, Operational Amplifier
+        https://www.ti.com/lit/ds/symlink/opa818.pdf
+        Gain of +7 stable 
+    """
+    def __init__(self):
+        self.AOL_gain = pow(10,94.3/20.0) 
+        self.AOL_bw = 50e3
+        self.AOL_pole = 500e6
+        self.GBWP = 2.7e9
+        
+    def gain(self,f):
+        """ gain """
+        return  self.AOL_gain / (1.0+ 1j * f/self.AOL_bw ) * (1.0/ (1.0+ 1j * f/self.AOL_pole ) )
+        
+    def voltage_noise(self,f):
+        """ amplifier input voltage noise in V/sqrt(Hz) """
+        #return numpy.array(len(f)*[4.8e-9]) # FIG 13
+        a0 = 2.0e-9      
+        a1 =  400e-9
+        return a0+a1/pow(f,0.6) 
+        
+    def current_noise(self,f):
+        """ amplifier input current noise in A/sqrt(Hz) """
+        return 1.0e-12*pow(f,0.8)/pow(28e6,0.8) # numpy.ones((len(f),1))
+    
+    def input_capacitance(self):
+        cm = 1.9e-12
+        diff= 0.5e-12
+        return cm+diff 
+
 class OPA847():
     """
         3.8GHz GBWP  Ultra-Low Noise, Voltage-Feedback, Bipolar Input 
