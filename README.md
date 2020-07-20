@@ -21,11 +21,14 @@ Open-loop gain, input-referred voltage and current noise, and input-capacitance 
 | ------------- | -------------   | --------- | --------------- | --------------- |
 | OPA657        | FET             |  1.6 GHz  | 5.2 pF          | 13 V            |
 | OPA859        | FET             |  1.8 GHz  | 0.8 pF          | 5 V             |
+| OPA818        | FET             |  2.7 GHz  | 2.4 pF          | 13 V            |
 | OPA847        | BJT             |  3.9 GHz  | 3.7 pF          | 13 V            |
 | OPA858        | FET             |  5.5 GHz  | 0.8 pF          | 5 V             |
 | OPA855        | BJT             |  8 GHz    | 0.8 pF          | 5 V             |
 
-The following might be good additions or comparisons: OPA818 (2.7GHz, 2.4pF, 13V), HMC799 (10kOhm TIA), LTC6268-10
+These integrated TIAs might be good for comparisons:  HMC799 (10kOhm, 700 MHz, TIA), LTC6560 (74 kOhm, 220 MHz)
+
+op-amps that could be added: LTC6268-10
 
 ### OPA657
 http://www.ti.com/lit/ds/symlink/opa657.pdf
