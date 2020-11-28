@@ -34,15 +34,29 @@ op-amps that could be added: LTC6268-10
 https://www.ti.com/lit/ds/symlink/opa818.pdf
 
 This image compares TIASim predicted bandwidth vs. photodiode capacitance and transimpedance to the datasheet front-page
-Figure. Note that the TIASim CF values are increased by a sqrt(2). CF is the capacitance across RF.
+Figure. Note that the TIASim CF values are increased by a sqrt(2) factor. CF is the capacitance across RF.
 
 ![opa818-bw-image](doc/OPA818_BW_vs_CD.png)
+
+This image shows measured and predicted dark and bright noise levels for an OPA818 photodetector with 1.2 kOhm transimpedance and 0.7 pF CF.
+The Photodiode is a Thorlabs FDS015. The -3dB badwidth is >400 MHz.
+
+![opa818-1k2-image](doc/2020-11-28_OPA818_1k2_log.png)
 
 
 ### OPA657
 http://www.ti.com/lit/ds/symlink/opa657.pdf
 
 ![opa657-image](doc/opa657.png)
+
+This OPA657 photodetector with S5791 photodiode and 1 MOhm transimpedance shows 4 MHz bandwidth. Note that this design has no output-buffer, and the TIASim predicted response was adjusted to fit the measurement data by de-rating the op-amp GBWP.
+
+![opa657-1M-image](doc/2020-05_1Mohm_OPA657.png)
+
+This OPA657 detector with S5793 photodiode and 10 kOhm transimpedance (0.2 pF CF) shows ca 60 MHz bandwidth.
+
+![opa657-10k-image](doc/2020-01-27_OPA657_S5973_10k.png)
+
 
 ### OPA847
 http://www.ti.com/lit/ds/symlink/opa847.pdf
