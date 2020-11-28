@@ -25,40 +25,39 @@ import tiasim
 if __name__ == "__main__":
     
     """
-        This example shows data from a photodetector built 2020-01.
+        This example shows data from a photodetector built 2020-11.
         PCB:            One-Inch-Photodetector, https://github.com/aewallin/One-Inch-Photodetector
-        Opamp:          OPA657, SOT23-5
-        Transimpedance: 10 kOhm
-        Photodiode:     S5973
+        Opamp:          OPA818 (with BUF602 output-buffer)
+        Transimpedance: 1.2 kOhm
+        CF:             0.7 pF
+        Photodiode:     FDS015
+        Bandwidth:      ca 415 MHz
     """
     P = 2e-6
     R_F = 1.2e3
-    C_F = .6e-12 # None # None # 0.2e-12
-    C_parasitic = 0.05e-12
-    
+    C_F = .75e-12 # None # None # 0.2e-12
+    C_parasitic = 0.01e-12 #0.05e-12
     diode = tiasim.FDS015() #tiasim.S5973()
-    #diode.capacitance = 1.6e-12
-    
     opamp = tiasim.OPA818()
-    #o#pamp.AOL_gain = pow(10,65.0/20.0) # NOTE: modify to make it fit data!?
-    # this could be because of capacitive load on the output??
-    # MMCX connector on PCB, followed by ca 150mm thin coax, to SMA-connector.
     
+    title = "FDS015 OPA818, RF=1k2, CF=0p7 (AW2020-11-28)"
     tia = tiasim.TIA( opamp, diode, R_F  , C_F, C_parasitic) 
     
     f = numpy.logspace(3,9.5,100)
-    bw = tia.bandwidth() # bandwidth
+    bw = tia.bandwidth() # bandwidth estimate
     zm = numpy.abs( tia.ZM(f) ) # transimpedance
     
     # load experimental data
-    d = numpy.genfromtxt('measurement_data/OPA657_S5793_10kOhm.csv',comments='#',delimiter=',')
+    d = numpy.genfromtxt('measurement_data/OPA818_FDS015_1k2_0p7.csv',comments='#',delimiter=',')
 
-
+    rbw = 1e6 # spectrum analyzer RBW
     df = d.T[0]
-    d_bright = d.T[2]
-    d_bright2 = d.T[1]
-    d_dark = d.T[3]
-    d_sa = d.T[4]
+    d_bright = d.T[4]
+    d_tg = d.T[3]
+    d_dark = d.T[2]
+    d_sa = d.T[1]
+    d_tgcorr = d_tg - d_dark # TG feedthru
+    d_bright_corr = d_bright - d_tgcorr
     #"""
     
     print( "P optical ", P*1e6 , " uW")
@@ -113,23 +112,25 @@ if __name__ == "__main__":
     plt.legend()
     
     # plot measured data and compare to model
-    plt.figure()
-    plt.plot(df, d_bright,'o',label='1st Measured response')
-    plt.plot(df, d_bright2,'o',label='2nd Measured response')
+    plt.figure(figsize=(12,10))
+    plt.plot(df, d_bright,'o',label='Measured response')
+    plt.plot(df, d_bright_corr,'o',label='Measured response - TG-feedthru')
     plt.plot(df, d_dark,'o',label='Measured dark')
     plt.plot(df, d_sa,'o',label='Measured SA floor')
 
-    rbw = 10e3
-    plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
     
-    for p in 1e-6*numpy.logspace(1, 8.5, 4):
+    #plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
+    plt.plot(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
+    
+    for p in 1e-6*numpy.logspace(1, 6.0, 8):
         bright = tiasim.v_to_dbm( tia.bright_noise(p, f), RBW = rbw)
         plt.plot(f,bright,label='TIASim P_shot =%.3g W'%(p))
     
-    plt.xlim((1e5,500e6))
-    plt.ylim((-120,-30))
+    plt.plot([bw,bw], [-120,-50],  '--', label='f3dB = %.1f MHz' % (bw/1e6))
     
-    #plt.xlim((10e6,100e6))
+    plt.xlim((1e6, 2.1e9))
+    plt.ylim((-120,-50))
+    plt.title(title)
     plt.xlabel('Frequency / Hz')
     plt.ylabel('dBm / RBW=%.1g Hz' % rbw)
     plt.grid()
