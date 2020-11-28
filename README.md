@@ -30,6 +30,15 @@ These integrated TIAs might be good for comparisons:  HMC799 (10kOhm, 700 MHz, T
 
 op-amps that could be added: LTC6268-10
 
+### OPA818
+https://www.ti.com/lit/ds/symlink/opa818.pdf
+
+This image compares TIASim predicted bandwidth vs. photodiode capacitance and transimpedance to the datasheet front-page
+Figure. Note that the TIASim CF values are increased by a sqrt(2). CF is the capacitance across RF.
+
+![opa818-bw-image](doc/OPA818_BW_vs_CD.png)
+
+
 ### OPA657
 http://www.ti.com/lit/ds/symlink/opa657.pdf
 
