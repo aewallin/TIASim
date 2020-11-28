@@ -406,7 +406,7 @@ class TIA():
             f_3dB= f[ind]
             return f_3dB
         except:
-            print "WARNING -3dB point not found"
+            print( "WARNING -3dB point not found" )
             return -1
     
     def set_CF(self):
@@ -422,7 +422,7 @@ class TIA():
         else:
             self.C_F = self.C_F_parasitic
             
-        print "optimum: %.3f pF, set C_F= %.3f pF" % (C_optimal*1e12, self.C_F*1e12)
+        print( "optimum: %.3f pF, set C_F= %.3f pF" % (C_optimal*1e12, self.C_F*1e12) )
 
     def cnr(self, f):
         """ carrier to noise ratio """
