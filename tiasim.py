@@ -295,6 +295,19 @@ class FDS015(Photodiode):
         self.capacitance = 0.65e-12
         self.responsivity = 0.4
 
+class FGA01FC(Photodiode):
+    """
+        Thorlabs FGA01FC InGaAs photodiode, with FC fiber-connector
+        https://www.thorlabs.com/thorproduct.cfm?partnumber=FGA01FC
+        120 um diameter active area
+        
+        2.0 pF capacitance at Vr = 5 V
+        TO-46 package
+    """
+    def __init__(self):
+        self.capacitance = 2.0e-12
+        self.responsivity = 1.0
+        
 class TIA():
     def __init__(self, opamp, diode, R_F, C_F=None, C_F_parasitic=None):
         """ build TIA from given opamp, diode and feedback resistance/capacitance """

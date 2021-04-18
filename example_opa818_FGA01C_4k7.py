@@ -35,14 +35,13 @@ if __name__ == "__main__":
     """
     P = 2e-6
     R_F = 4.7e3
-    C_F = 0.12e-12 # None # .75e-12 # None # None # 0.2e-12
+    C_F = 0.15e-12 # None # .75e-12 # None # None # 0.2e-12
     C_parasitic = 0.0e-12 #0.05e-12
-    diode = tiasim.FDS015() #tiasim.S5973()
-    diode.capacitance = 2e-12
+    diode = tiasim.FGA01FC() 
     opamp = tiasim.OPA818()
     
     title = "FGA01FC OPA818, RF=4k7, CF=0.12pF, (AW2021-04-17)"
-    tia = tiasim.TIA( opamp, diode, R_F  , C_F, C_parasitic) 
+    tia = tiasim.TIA( opamp, diode, R_F, C_F, C_parasitic) 
     
     f = numpy.logspace(3,9,500)
     bw = tia.bandwidth() # bandwidth estimate
@@ -107,12 +106,7 @@ if __name__ == "__main__":
     # plot measured data and compare to model
     plt.figure(figsize=(12,10))
     plt.plot(df, d_bright,'o',label='Measured response')
-    #plt.plot(df, d_bright_corr,'o',label='Measured response - TG-feedthru')
     plt.plot(df, d_dark,'o',label='Measured dark')
-    #plt.plot(df, d_sa,'o',label='Measured SA floor')
-
-    
-    #plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
     plt.plot(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
     plt.plot(f, tiasim.v_to_dbm( numpy.sqrt( 4*tiasim.kB*tiasim.T/R_F )*R_F*numpy.ones((len(f),1)) , RBW = rbw),'--',label='RF thermal noise')
     
