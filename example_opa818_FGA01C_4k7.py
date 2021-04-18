@@ -25,41 +25,35 @@ import tiasim
 if __name__ == "__main__":
     
     """
-        This example shows data from a photodetector built 2020-01.
+        This example shows data from a photodetector built 2021-04.
         PCB:            One-Inch-Photodetector, https://github.com/aewallin/One-Inch-Photodetector
-        Opamp:          OPA657, SOT23-5
-        Transimpedance: 10 kOhm
-        Photodiode:     S5973
+        Opamp:          OPA818 (with BUF602 output-buffer)
+        Transimpedance: 4.7 kOhm
+        CF:             not installed
+        Photodiode:     FGA01FC, 2pF @ 5V
+        Bandwidth:      ca 200 MHz
     """
     P = 2e-6
-    R_F = 100e3
-    C_F =  0.1e-12 # None # .6e-12 # None # None # 0.2e-12
-    C_parasitic = 0.005e-12
-    
-    diode = tiasim.S5973()
-    #diode.capacitance = 1.6e-12
-    
+    R_F = 4.7e3
+    C_F = 0.12e-12 # None # .75e-12 # None # None # 0.2e-12
+    C_parasitic = 0.0e-12 #0.05e-12
+    diode = tiasim.FDS015() #tiasim.S5973()
+    diode.capacitance = 2e-12
     opamp = tiasim.OPA818()
-    #o#pamp.AOL_gain = pow(10,65.0/20.0) # NOTE: modify to make it fit data!?
-    # this could be because of capacitive load on the output??
-    # MMCX connector on PCB, followed by ca 150mm thin coax, to SMA-connector.
     
+    title = "FGA01FC OPA818, RF=4k7, CF=0.12pF, (AW2021-04-17)"
     tia = tiasim.TIA( opamp, diode, R_F  , C_F, C_parasitic) 
     
-    f = numpy.logspace(3,9.5,100)
-    bw = tia.bandwidth() # bandwidth
+    f = numpy.logspace(3,9,500)
+    bw = tia.bandwidth() # bandwidth estimate
     zm = numpy.abs( tia.ZM(f) ) # transimpedance
     
     # load experimental data
-    d = numpy.genfromtxt('measurement_data/OPA657_S5793_10kOhm.csv',comments='#',delimiter=',')
-
-
+    d = numpy.genfromtxt('measurement_data/OPA818_FGA01FC_4k7.csv',comments='#',delimiter=',')
+    rbw = 3e3 # spectrum analyzer RBW
     df = d.T[0]
-    d_bright = d.T[2]
-    d_bright2 = d.T[1]
-    d_dark = d.T[3]
-    d_sa = d.T[4]
-    #"""
+    d_bright = d.T[1]
+    d_dark = d.T[2]
     
     print( "P optical ", P*1e6 , " uW")
     print( "Photocurrent ", P*0.4, " uA")
@@ -68,9 +62,7 @@ if __name__ == "__main__":
     print( "I shot %.2g A/sqrt(Hz)" % (numpy.sqrt(0.4*P*tiasim.q*2.0)))
     print( "R_F voltage ", tia.dc_output(P,100e3))
     print( "Bandwidth ", bw/1e6, " MHz")
- 
     print( "simple bw model ", tia.bandwidth_approx()/1e6, " MHz")
-
 
     # transimpedance plot
     plt.figure()
@@ -113,23 +105,27 @@ if __name__ == "__main__":
     plt.legend()
     
     # plot measured data and compare to model
-    plt.figure()
-    plt.plot(df, d_bright,'o',label='1st Measured response')
-    plt.plot(df, d_bright2,'o',label='2nd Measured response')
+    plt.figure(figsize=(12,10))
+    plt.plot(df, d_bright,'o',label='Measured response')
+    #plt.plot(df, d_bright_corr,'o',label='Measured response - TG-feedthru')
     plt.plot(df, d_dark,'o',label='Measured dark')
-    plt.plot(df, d_sa,'o',label='Measured SA floor')
+    #plt.plot(df, d_sa,'o',label='Measured SA floor')
 
-    rbw = 10e3
-    plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
     
-    for p in 1e-6*numpy.logspace(1, 8.5, 4):
+    #plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
+    plt.plot(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
+    plt.plot(f, tiasim.v_to_dbm( numpy.sqrt( 4*tiasim.kB*tiasim.T/R_F )*R_F*numpy.ones((len(f),1)) , RBW = rbw),'--',label='RF thermal noise')
+    
+    # TIAsim bright response
+    for p in 1e-6*numpy.logspace(3, 11.0, 8):
         bright = tiasim.v_to_dbm( tia.bright_noise(p, f), RBW = rbw)
-        plt.plot(f,bright,label='TIASim P_shot =%.3g W'%(p))
+        plt.plot(f,bright,label='TIASim P_shot =%.2g W'%(p))
     
-    plt.xlim((1e5,500e6))
-    plt.ylim((-120,-30))
+    plt.plot([bw,bw], [-120,-20],  '--', label='f3dB = %.1f MHz' % (bw/1e6))
     
-    #plt.xlim((10e6,100e6))
+    plt.xlim((10e6, 0.5e9))
+    plt.ylim((-120,-20))
+    plt.title(title)
     plt.xlabel('Frequency / Hz')
     plt.ylabel('dBm / RBW=%.1g Hz' % rbw)
     plt.grid()
