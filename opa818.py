@@ -29,25 +29,25 @@ gbwp = opa.GBWP
 d = numpy.genfromtxt('opa818/opa818_AOL_gain.txt', comments='#', delimiter=',')
 f = [x[0]*1e6 for x in d]
 aol = [pow(10,x[1]/20.0) for x in d]
-print "Gain: ", f, aol
+print("Gain: ", f, aol)
 
 # read phase
 d = numpy.genfromtxt('opa818/opa818_AOL_phase.txt', comments='#', delimiter=',')
 fp = [x[0]*1e6 for x in d]
 phase = [x[1] for x in d]
-print "Phase: ", fp, phase
+print("Phase: ", fp, phase)
 
 # read vnoise
 d = numpy.genfromtxt('opa818/opa818_vn.txt', comments='#', delimiter=',')
 fn = [x[0]*1e6 for x in d]
 vn = [x[1]*1e-9 for x in d] # from nV/sqrt(Hz)
-print "Vnoise: ", fn, vn
+print("Vnoise: ", fn, vn)
 
 # read inoise
 d = numpy.genfromtxt('opa818/opa818_in.txt', comments='#', delimiter=',')
 fin = [x[0]*1e6 for x in d]
 inoise = [x[1]*1e-15 for x in d] # from fA/sqrt(Hz)
-print "Inoise: ", fin, inoise
+print("Inoise: ", fin, inoise)
 
 plt.figure(figsize=(12,10))
 plt.subplot(2,2,1)
