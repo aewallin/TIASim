@@ -307,6 +307,21 @@ class FGA01FC(Photodiode):
     def __init__(self):
         self.capacitance = 2.0e-12
         self.responsivity = 1.0
+
+
+class FD80FC(Photodiode):
+    """
+        Fermionics FD80FC InGaAs photodiode, with FC fiber-connector
+        https://www.fermionics.com/files/FD80series.pdf
+        80 um diameter active area
+        
+        Typ. 0.4 pF (max 0.75 pF) capacitance at Vr = 5 V
+        TO-style package
+    """
+    def __init__(self):
+        self.capacitance = 0.4e-12
+        self.responsivity = 0.8
+
         
 class TIA():
     def __init__(self, opamp, diode, R_F, C_F=None, C_F_parasitic=None):
