@@ -47,7 +47,7 @@ if __name__ == "__main__":
     tia = tiasim.TIA( opamp, diode, R_F  , C_F, C_parasitic) 
     
     RF2 = 33e3
-    CF2 = None # 0.1e-12
+    CF2 = 0.15e-12
     CP2 = 0.02e-12
     tia2 = tiasim.TIA( tiasim.OPA818(), diode, RF2, CF2, CP2)
     
@@ -129,35 +129,40 @@ if __name__ == "__main__":
     # plot measured data and compare to model
     # measurements through 10 dB coupler
     plt.figure()
-    plt.plot(df, d_bright+10,'o',label='bright')
-    plt.plot(df, d_bright2+10,'o',label='dark')
-    plt.plot(df, d_dark+10,'o',label='SA floor')
+    #plt.plot(df, d_bright+10,'o',label='bright')
+    #plt.plot(df, d_bright2+10,'o',label='dark')
+    #plt.plot(df, d_dark+10,'o',label='SA floor')
     
-    plt.plot(ddf, dd_bright+10,'.',label='bright')
-    plt.plot(ddf, dd_bright2+10,'.',label='dark')
-    plt.plot(ddf, dd_dark+10,'.',label='SA floor')
+    plt.plot(ddf, dd_bright,'.',label='dark')
+    plt.plot(ddf, dd_bright2,'.',label='signal')
+    plt.plot(ddf, dd_dark,'.',label='bright, DC-output ca 0.5 V')
+    plt.plot(ddf, dd_bright3,'.',label='SA floor')
        
     #plt.plot(df, d_sa,'o',label='Measured SA floor')
 
-    rbw = 300e3
+    rbw = 30e3
     postgain_db = 20 # 10 V/V voltage-gain = 20 dB power gain
-    plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw)+postgain_db,'-',label='OPA657/38kOhm TIASim Dark')
+    #plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw)+postgain_db,'-',label='OPA657/38kOhm TIASim Dark')
 
     r = RF2 / R_F
-    r_dB = 20*numpy.log10( r )
+    r_dB = 0 # 20*numpy.log10( r )
     plt.semilogx(f, tiasim.v_to_dbm( tia2.bright_noise(0, f), RBW = rbw)+postgain_db- r_dB ,'-.',label='OPA828 TIASim Dark')
 
     
-    for p in 1e-6*numpy.logspace(1, 2.0, 3):
+    for p in 1e-6*numpy.array([10,100, 0.5e6]):
         bright = tiasim.v_to_dbm( tia.bright_noise(p, f), RBW = rbw)+postgain_db
         bright2 = tiasim.v_to_dbm( tia2.bright_noise(p, f), RBW = rbw)+postgain_db- r_dB
-        plt.plot(f,bright,label='TIASim P_shot =%.3g W'%(p))
+        plt.plot(f,bright,label='OLD OPA657 detector, TIASim P_shot =%.3g W'%(p))
         plt.plot(f,bright2,'-.',label='TIASim P_shot =%.3g W'%(p))
+    
+    # johnson_noise(self, f)
+    jn = tiasim.v_to_dbm( tia2.johnson_noise(f), RBW = rbw)+postgain_db- r_dB
+    plt.plot(f,jn,'-',label='RF Johnson noise')
 
     plt.plot([25e6, 25e6],[-80, -30],'k--',label='25 MHz EOM frequency')
     
     plt.xlim((1e5,500e6))
-    plt.ylim((-80,-30))
+    plt.ylim((-100,-20))
     
     #plt.xlim((10e6,100e6))
     plt.xlabel('Frequency / Hz')
