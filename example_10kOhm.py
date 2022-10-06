@@ -49,7 +49,7 @@ if __name__ == "__main__":
     f = numpy.logspace(3,9.5,100)
     bw = tia.bandwidth() # bandwidth
     zm = numpy.abs( tia.ZM(f) ) # transimpedance
-    
+    print('Trandimpedance at 150 MHz:', numpy.abs( tia.ZM(150e6) ) )
     # load experimental data
     d = numpy.genfromtxt('measurement_data/OPA657_S5793_10kOhm.csv',comments='#',delimiter=',')
 
@@ -61,15 +61,15 @@ if __name__ == "__main__":
     d_sa = d.T[4]
     #"""
     
-    print "P optical ", P*1e6 , " uW"
-    print "Photocurrent ", P*0.4, " uA"
-    print "DC signal ", R_F*P*0.4, " V"
+    print("P optical ", P*1e6 , " uW")
+    print("Photocurrent ", P*0.4, " uA")
+    print("DC signal ", R_F*P*0.4, " V")
     
-    print "I shot %.2g A/sqrt(Hz)" % (numpy.sqrt(0.4*P*tiasim.q*2.0))
-    print "R_F voltage ", tia.dc_output(P,100e3)
-    print "Bandwidth ", bw/1e6, " MHz"
+    print( "I shot %.2g A/sqrt(Hz)" % (numpy.sqrt(0.4*P*tiasim.q*2.0)))
+    print( "R_F voltage ", tia.dc_output(P,100e3))
+    print( "Bandwidth ", bw/1e6, " MHz")
  
-    print "simple bw model ", tia.bandwidth_approx()/1e6, " MHz"
+    print( "simple bw model ", tia.bandwidth_approx()/1e6, " MHz")
 
 
     # transimpedance plot
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     
     # output voltage noise
     plt.figure()
-    print "amp_i"
+    #print "amp_i"
     amp_i = tia.amp_current_noise(f)
     amp_v = tia.amp_voltage_noise(f)
     john = tia.johnson_noise(f)

@@ -32,14 +32,15 @@ if __name__ == "__main__":
         Photodiode:     S5973
     """
     P = 10e-6
-    R_F = 38e3
-    C_F =  None # 0.5e-12 #  # .6e-12 # None # None # 0.2e-12
-    C_parasitic = 0.005e-12
+    R_F = 4e3
+    C_F =  0.5e-12 #  # .6e-12 # None # None # 0.2e-12
+    C_parasitic = 0.0005e-12
     
     diode = tiasim.S5973()
     #diode.capacitance = 1.6e-12
     
     opamp = tiasim.OPA657()
+    #opamp = tiasim.OPA818()
     #o#pamp.AOL_gain = pow(10,65.0/20.0) # NOTE: modify to make it fit data!?
     # this could be because of capacitive load on the output??
     # MMCX connector on PCB, followed by ca 150mm thin coax, to SMA-connector.
@@ -49,6 +50,7 @@ if __name__ == "__main__":
     f = numpy.logspace(3,9.5,100)
     bw = tia.bandwidth() # bandwidth
     zm = numpy.abs( tia.ZM(f) ) # transimpedance
+    print('Trandimpedance at 150 MHz:', numpy.abs( tia.ZM(150e6) ) )
     
     # load experimental data
     d = numpy.genfromtxt('measurement_data/OPA657_S5793_8k2_10postgain.csv',comments='#',delimiter=',')
