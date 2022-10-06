@@ -31,14 +31,15 @@ if __name__ == "__main__":
         Transimpedance: 10 kOhm
         Photodiode:     S5973
     """
-    P = 10e-6
-    R_F = 4e3
-    C_F =  0.3e-12 #None # 0.5e-12 #  # .6e-12 # None # None # 0.2e-12
+    P = 20e-6
+    R_F = 120e3
+    C_F =  None # 0.1e-12 # None # 0.1e-12 # None # .6e-12 # None # None # 0.2e-12
     C_parasitic = 0.005e-12
     
     diode = tiasim.S5973()
     #diode.capacitance = 1.6e-12
-    opamp = tiasim.OPA657()
+    
+    opamp = tiasim.OPA818()
     #o#pamp.AOL_gain = pow(10,65.0/20.0) # NOTE: modify to make it fit data!?
     # this could be because of capacitive load on the output??
     # MMCX connector on PCB, followed by ca 150mm thin coax, to SMA-connector.
@@ -48,17 +49,17 @@ if __name__ == "__main__":
     f = numpy.logspace(3,9.5,100)
     bw = tia.bandwidth() # bandwidth
     zm = numpy.abs( tia.ZM(f) ) # transimpedance
-    print('Trandimpedance at 150 MHz:', numpy.abs( tia.ZM(150e6) ) )
+    z_phase = numpy.angle( tia.ZM(f) ) # transimpedance phase
     
     # load experimental data
-    d = numpy.genfromtxt('measurement_data/OPA657_S5793_8k2_10postgain.csv',comments='#',delimiter=',')
+    d = numpy.genfromtxt('measurement_data/OPA657_S5793_10kOhm.csv',comments='#',delimiter=',')
 
 
     df = d.T[0]
     d_bright = d.T[2]
     d_bright2 = d.T[1]
     d_dark = d.T[3]
-    #d_sa = d.T[4]
+    d_sa = d.T[4]
     #"""
     
     print( "P optical ", P*1e6 , " uW")
@@ -74,6 +75,7 @@ if __name__ == "__main__":
 
     # transimpedance plot
     plt.figure()
+    plt.subplot(2,1,1)
     plt.loglog(f,zm,'-', label='Transimpedance')
     
     plt.loglog( bw, numpy.abs(tia.ZM( bw )), 'o',label='-3 dB BW')
@@ -82,6 +84,10 @@ if __name__ == "__main__":
     plt.ylabel('Transimpedance / Ohm')
     plt.xlabel('Frequency / Hz')
     
+    plt.legend()
+    plt.grid()
+    plt.subplot(2,1,2)
+    plt.semilogx(f,z_phase,'-', label='phase')
     plt.legend()
     plt.grid()
     
@@ -114,15 +120,15 @@ if __name__ == "__main__":
     
     # plot measured data and compare to model
     plt.figure()
-    plt.plot(df, d_bright-20,'o',label='bright')
-    plt.plot(df, d_bright2-20,'o',label='dark')
-    plt.plot(df, d_dark-20,'o',label='modulated')
-    #plt.plot(df, d_sa,'o',label='Measured SA floor')
+    plt.plot(df, d_bright,'o',label='1st Measured response')
+    plt.plot(df, d_bright2,'o',label='2nd Measured response')
+    plt.plot(df, d_dark,'o',label='Measured dark')
+    plt.plot(df, d_sa,'o',label='Measured SA floor')
 
-    rbw = 30e3
+    rbw = 10e3
     plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
     
-    for p in 1e-6*numpy.logspace(1, 7.0, 6):
+    for p in 1e-6*numpy.logspace(1, 8.5, 4):
         bright = tiasim.v_to_dbm( tia.bright_noise(p, f), RBW = rbw)
         plt.plot(f,bright,label='TIASim P_shot =%.3g W'%(p))
     
@@ -132,7 +138,6 @@ if __name__ == "__main__":
     #plt.xlim((10e6,100e6))
     plt.xlabel('Frequency / Hz')
     plt.ylabel('dBm / RBW=%.1g Hz' % rbw)
-    plt.title('S5793 photodiode, OPA657 8k2 TIA, 10 V/V postgain')
     plt.grid()
     plt.legend()
     plt.show()

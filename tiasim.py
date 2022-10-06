@@ -308,6 +308,19 @@ class FGA01FC(Photodiode):
         self.capacitance = 2.0e-12
         self.responsivity = 1.0
 
+class FGA015(Photodiode):
+    """
+        Thorlabs FGA015 InGaAs photodiode, TO-18 with flat window
+        https://www.thorlabs.com/thorproduct.cfm?partnumber=FGA015
+        150 um diameter active area
+        
+        1.5 pF capacitance at Vr = 5 V
+        responsivity 0.95 A/W at 1550 nm
+        0.5 nA dark current at 5 Vr
+    """
+    def __init__(self):
+        self.capacitance = 1.5e-12
+        self.responsivity = 0.95
 
 class FD80FC(Photodiode):
     """

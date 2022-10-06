@@ -33,21 +33,21 @@ if __name__ == "__main__":
     """
     P = 10e-6
     R_F = 38e3
-    C_F =  None # 0.08e-12 # None # #  # .6e-12 # None # None # 0.2e-12
+    C_F =  0.07e-12 # None # 0.08e-12 # None # #  # .6e-12 # None # None # 0.2e-12
     C_parasitic = 0.02e-12
     
     diode = tiasim.S5973()
     #diode.capacitance = 1.6e-12
     
     opamp = tiasim.OPA657()
-    opamp.AOL_gain = pow(10,70.0/20.0) # NOTE: modify to make it fit data!?
+    opamp.AOL_gain = pow(10,69.0/20.0) # NOTE: modify to make it fit data!?
     # this could be because of capacitive load on the output??
     # MMCX connector on PCB, followed by ca 150mm thin coax, to SMA-connector.
     
     tia = tiasim.TIA( opamp, diode, R_F  , C_F, C_parasitic) 
     
     RF2 = 33e3
-    CF2 = None # 0.1e-12
+    CF2 = 0.15e-12
     CP2 = 0.02e-12
     tia2 = tiasim.TIA( tiasim.OPA818(), diode, RF2, CF2, CP2)
     
