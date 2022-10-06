@@ -25,31 +25,25 @@ import tiasim
 if __name__ == "__main__":
     
     """
-        This example shows data from a photodetector built 2020-01.
-        PCB:            One-Inch-Photodetector, https://github.com/aewallin/One-Inch-Photodetector
-        Opamp:          OPA657, SOT23-5
-        Transimpedance: 10 kOhm
-        Photodiode:     S5973
+
     """
     P = 10e-6
     R_F = 38e3
     C_F =  None # 0.08e-12 # None # #  # .6e-12 # None # None # 0.2e-12
     C_parasitic = 0.02e-12
     
-    diode = tiasim.S5973()
-    #diode.capacitance = 1.6e-12
-    
+    diode = tiasim.S5973()    
     opamp = tiasim.OPA657()
     opamp.AOL_gain = pow(10,70.0/20.0) # NOTE: modify to make it fit data!?
     # this could be because of capacitive load on the output??
-    # MMCX connector on PCB, followed by ca 150mm thin coax, to SMA-connector.
+    # MMCX connector on PCB, followed by ca 150mm thin coax, to SMA-connector.    
+    tia2 = tiasim.TIA( opamp, diode, R_F  , C_F, C_parasitic) 
     
-    tia = tiasim.TIA( opamp, diode, R_F  , C_F, C_parasitic) 
-    
+    ## new detector with OPA818
     RF2 = 33e3
     CF2 = 0.15e-12
     CP2 = 0.02e-12
-    tia2 = tiasim.TIA( tiasim.OPA818(), diode, RF2, CF2, CP2)
+    tia = tiasim.TIA( tiasim.OPA818(), diode, RF2, CF2, CP2)
     
     f = numpy.logspace(3,9.5,600)
     bw = tia.bandwidth() # bandwidth
@@ -69,9 +63,15 @@ if __name__ == "__main__":
     dd_bright = dd.T[3]
     dd_bright2 = dd.T[1]
     dd_dark = dd.T[2]
-    
-    #d_sa = d.T[4]
-    #"""
+
+    # Shot-noise levels, new OPA818 detector
+    ds = numpy.genfromtxt('measurement_data/2022-06-17_opa818_33k_20dBpostgain_shot.csv',comments='#',delimiter=',')
+    dsf = ds.T[0]
+    ds_bright3 = ds.T[4]
+    ds_bright = ds.T[3]
+    ds_bright2 = ds.T[1]
+    ds_dark = ds.T[2]    
+ 
     
     print( "P optical ", P*1e6 , " uW")
     print( "Photocurrent ", P*0.4, " uA")
@@ -141,22 +141,22 @@ if __name__ == "__main__":
     #plt.plot(df, d_sa,'o',label='Measured SA floor')
 
     rbw = 30e3
-    postgain_db = 20 # 10 V/V voltage-gain = 20 dB power gain
+    postgain_db = 21 # 10 V/V voltage-gain = 20 dB power gain
     #plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw)+postgain_db,'-',label='OPA657/38kOhm TIASim Dark')
 
-    r = RF2 / R_F
-    r_dB = 0 # 20*numpy.log10( r )
-    plt.semilogx(f, tiasim.v_to_dbm( tia2.bright_noise(0, f), RBW = rbw)+postgain_db- r_dB ,'-.',label='OPA828 TIASim Dark')
+    #r = RF2 / R_F
+    #r_dB = 0 # 20*numpy.log10( r )
+    plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw)+postgain_db,'-.',label='OPA818 TIASim Dark')
 
     
-    for p in 1e-6*numpy.array([10,100, 0.5e6]):
+    for p in 1e-6*numpy.array([10,100, 0.5e5, 0.5e6]):
         bright = tiasim.v_to_dbm( tia.bright_noise(p, f), RBW = rbw)+postgain_db
-        bright2 = tiasim.v_to_dbm( tia2.bright_noise(p, f), RBW = rbw)+postgain_db- r_dB
-        plt.plot(f,bright,label='OLD OPA657 detector, TIASim P_shot =%.3g W'%(p))
-        plt.plot(f,bright2,'-.',label='TIASim P_shot =%.3g W'%(p))
+        bright2 = tiasim.v_to_dbm( tia2.bright_noise(p, f), RBW = rbw)+postgain_db
+        plt.plot(f,bright,label='OPA818 detector, TIASim P_shot =%.3g W'%(p))
+        #plt.plot(f,bright2,'-.',label='TIASim P_shot =%.3g W'%(p))
     
     # johnson_noise(self, f)
-    jn = tiasim.v_to_dbm( tia2.johnson_noise(f), RBW = rbw)+postgain_db- r_dB
+    jn = tiasim.v_to_dbm( tia2.johnson_noise(f), RBW = rbw)+postgain_db
     plt.plot(f,jn,'-',label='RF Johnson noise')
 
     plt.plot([25e6, 25e6],[-80, -30],'k--',label='25 MHz EOM frequency')
@@ -170,9 +170,37 @@ if __name__ == "__main__":
     plt.title('S5793 photodiode, OPA657 38kOhm TIA, 10 V/V postgain')
     plt.grid()
     plt.legend()
+    plt.xscale('linear')
+    plt.xlim((1e6,250e6))
+
+
+    ##########################3
+    # Shot Noise levels
+    plt.figure()
+    sidx = 5
+    plt.plot(dsf[sidx:-1], ds_bright[sidx:-1],'.',label='Bright, 0.5 VDC')
+    plt.plot(dsf[sidx:-1], ds_bright2[sidx:-1],'.',label='Bright, 0.1 VDC')
+    plt.plot(dsf[sidx:-1], ds_dark[sidx:-1],'.',label='Bright, 0.2 VDC')
+    plt.plot(dsf[sidx:-1], ds_bright3[sidx:-1],'.',label='Dark')
+    rbw = 300000
+    
+    plt.plot(dsf[sidx:-1], tiasim.v_to_dbm( tia.bright_noise(0, dsf[sidx:-1]), RBW = rbw)+postgain_db,'-.',label='OPA818 TIASim Dark')
+    # P*R*RF * 0.5 * postgain = VDC
+    # P = VDC / (R*RF*postgain*0.5)
+    P1 = 0.1 / (0.4*RF2*pow(10, postgain_db/20)*0.5)
+    plt.plot(dsf[sidx:-1], tiasim.v_to_dbm( tia.bright_noise(P1, dsf[sidx:-1]), RBW = rbw)+postgain_db,'-.',label='OPA818 TIASim Bright, 0.1 VDC = %g W'%P1)
+    P2 = 10e-6
+    plt.plot(dsf[sidx:-1], tiasim.v_to_dbm( tia.bright_noise(P2, dsf[sidx:-1]), RBW = rbw)+postgain_db,'-.',label='OPA818 TIASim Bright,  %g W'%P2)
+    P3 = 100e-6
+    plt.plot(dsf[sidx:-1], tiasim.v_to_dbm( tia.bright_noise(P3, dsf[sidx:-1]), RBW = rbw)+postgain_db,'-.',label='OPA818 TIASim Bright,  %g W'%P3)
+    
+    plt.xlabel('Frequency / Hz')
+    plt.ylabel('dBm / RBW=%.1g Hz' % rbw)
+    #plt.title('S5793 photodiode, OPA657 38kOhm TIA, 10 V/V postgain')
+    plt.grid()
+    plt.legend()
     #plt.xscale('linear')
-    #plt.xlim((1e5,55e6))
+    #plt.xlim((1e6,250e6))
     plt.show()
 
-
- 
+    plt.show()
