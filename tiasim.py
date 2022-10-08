@@ -234,12 +234,10 @@ class OPA847():
         
     def voltage_noise(self,f):
         """ amplifier input voltage noise in V/sqrt(Hz) """
-        #return numpy.array(len(f)*[0.85e-9])
         return 0.85e-9
         
     def current_noise(self,f):
         """ amplifier input current noise in A/sqrt(Hz) """
-        #return numpy.array(len(f)*[2.7e-12])
         return 2.7e-12
     
     def input_capacitance(self):
@@ -295,6 +293,18 @@ class FDS015(Photodiode):
         self.capacitance = 0.65e-12
         self.responsivity = 0.4
 
+class FDS025(Photodiode):
+    """
+        Thorlabs FDS025 Si photodiode, with ball lens
+        250 um diameter active area
+        
+        0.94 pF capacitance at Vr = 5 V
+        TO-46 package
+    """
+    def __init__(self):
+        self.capacitance = 0.94e-12
+        self.responsivity = 0.4
+        
 class FGA01FC(Photodiode):
     """
         Thorlabs FGA01FC InGaAs photodiode, with FC fiber-connector
@@ -473,6 +483,45 @@ class TIA():
         #print c,n
         return c,n,c-n
 
+class NonInvertingAmp():
+    """
+        non-inverting op-amp
+        G = 1 + Rf/Rg
+        
+        use after TIA to provide more gain
+    """
+    def __init__(self, opamp, Rf, Rg):
+        self.opamp = opamp
+        self.Rf = Rf
+        self.Rg = Rg
+        
+    def gain_nominal(self):
+        return 1.0+self.Rf/self.Rg
+        
+    def gain(self,f):
+        """
+            closed-loop voltage gain
+        """
+        Av = self.opamp.gain(f)
+        beta = self.Rg/(self.Rf+self.Rg)
+        return Av / (1.0 + Av*beta)
+    
+    def bandwidth(self):
+        """ 
+            -3 dB bandwidth 
+            Found by searching for the frequency where gain(f) = gain(0)/sqrt(2) 
+        """
+        f = numpy.logspace(1,10,1e6)
+        g = numpy.abs( self.gain(f) )
+        try:
+            ind = min( min(numpy.where( g < g[0]/numpy.sqrt(2.0)) ) )
+            f_3dB= f[ind]
+            return f_3dB
+        except:
+            print( "WARNING -3dB point not found" )
+            return -1
+            
+            
 def v_to_dbm(v_psd, RBW = 1.0, termination=True):
     """ 
         convert voltage noise in v/sqrt(Hz)
@@ -485,7 +534,12 @@ def v_to_dbm(v_psd, RBW = 1.0, termination=True):
     if termination:
         dbm = dbm - 6.0 # 50-ohm termination halves voltage, so -6dB power
     return dbm
-        
+
+def gain_to_db(g):
+    """
+        voltage gain to dB
+    """
+    return 20*numpy.log10(g)
         
 if __name__ == "__main__":
     pass

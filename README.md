@@ -25,10 +25,23 @@ Open-loop gain, input-referred voltage and current noise, and input-capacitance 
 | OPA847        | BJT             |  3.9 GHz  | 3.7 pF          | 13 V            |
 | OPA858        | FET             |  5.5 GHz  | 0.8 pF          | 5 V             |
 | OPA855        | BJT             |  8 GHz    | 0.8 pF          | 5 V             |
+| LTC6268-10    | FET             |  4 GHz    | 0.55 pF         | 5 V             |
 
 These integrated TIAs might be good for comparisons:  HMC799 (10kOhm, 700 MHz, TIA), LTC6560 (74 kOhm, 220 MHz)
 
-op-amps that could be added: LTC6268-10
+## Photodiodes
+
+| Photodiode        | Material        | Capacitance | Active area | Notes  |
+| ----------------- | -------------   | ----------- | --------------- | --------------- |
+| Hamamatsu S5973   | Si              |  1.6 pF     | D=0.4 mm          |             |
+| Hamamatsu S5971   | Si              |  4.0 pF     | D=1.2 mm          |              |
+| Thorlabs FDS015   | Si              |  0.65 pF    | D=0.15 mm          | FCI-125G-006HR            |
+| Thorlabs FDS025   | Si              |  0.94 pF    | D=0.25 mm          | Ball lens, FCI-125G-010HRL          |
+| Thorlabs FGA01FC  | InGaAs          |  2.0 pF     | D=0.12 mm          | FC-connector, INGAAS-120L-FC           |
+| Thorlabs FGA015   | InGaAs          |  1.5 pF     | D=0.15 mm          |           |
+| Fermionics FD80FC | InGaAs          |  0.4 pF     | D=0.08 mm          | FC-connector             |
+
+
 
 ### OPA818
 https://www.ti.com/lit/ds/symlink/opa818.pdf
