@@ -466,6 +466,7 @@ class TIA():
             C_opt = sqrt( C_source / 2*pi*GBWP*R_F )
             
             design point is Q=1/sqrt(2) ~ 0.71 which is the maximally flat "Butterworth" frequency response
+            45 degree phase margin
         """
         C_optimal = numpy.sqrt( self.C_tot / (2.0*numpy.pi*self.opamp.GBWP*self.R_F))
         if C_optimal > self.C_F_parasitic:
@@ -474,7 +475,33 @@ class TIA():
             self.C_F = self.C_F_parasitic
             
         print( "optimum: %.3f pF, set C_F= %.3f pF" % (C_optimal*1e12, self.C_F*1e12) )
+    
+    def noise_gain(self, f):
+        """
+            noise gain
+            use for evaluating stability
+            
+        """
+        Rsh = 1e7 # photodiode shunt resistance, 'large'
+        t1 = (Rsh+ self.R_F)/Rsh
+        t2n = 1.0+2*numpy.pi*f*((Rsh*self.R_F)/(Rsh+self.R_F) )*(self.C_tot + self.C_F) 
+        t2d = 1.0+2*numpy.pi*f*self.R_F*self.C_F 
+        return t1*(t2n/t2d)
+        
+    def pole(self):
+        """
+            noise gain pole frequency
+        """
+        return 1.0/(2*numpy.pi*self.R_F*self.C_F)
 
+    def zero(self):
+        """
+            noise gain zero frequency
+        """
+        Rsh = 1e7 # photodiode shunt resistance, 'large'
+        return 1.0/ (2*numpy.pi*((Rsh*self.R_F)/(Rsh+self.R_F) )*(self.C_tot + self.C_F) )
+        
+    
     def cnr(self, f):
         """ carrier to noise ratio """
         P = 1.0
