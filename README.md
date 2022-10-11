@@ -12,6 +12,7 @@ Analog Devices has a Photodiode Circuit Design Wizard at https://tools.analog.co
 * Transimpedance Considerations for High-Speed Amplifiers http://www.ti.com/lit/an/sboa122/sboa122.pdf
   - RF lower than 2 kOhm -> use BJT opamp
   - RF higher than 2 kOhm -> use FET opamp
+* Scott et al. 2001, "High-dynamic-range laser amplitude and phase noise measurement techniques" [DOI:10.1109/2944.974236](https://doi.org/10.1109/2944.974236)
 
 ## op-amps
 
