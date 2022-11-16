@@ -74,7 +74,7 @@ if __name__ == "__main__":
     plt.grid()
     plt.legend()
     
-    rbw = 30e3 # spectrum analyzer RBW
+    rbw = 10e3 # spectrum analyzer RBW
     # load experimental data
     #d = numpy.genfromtxt('measurement_data/OPA818_FD80FC_5k1.csv',comments='#',delimiter=',')
     d = numpy.genfromtxt('measurement_data/2022-11-16_opa818_fd80fc_5k1.csv',comments='#',delimiter=',')
@@ -86,16 +86,31 @@ if __name__ == "__main__":
     
     # plot measured data and compare to model
     plt.figure(figsize=(12,10))
-    plt.plot(df, d_bright1,'ro',label='Measured response 1')
+    plt.plot(df, d_bright1,'ro',label='2022-11 Measured response 1')
     #plt.plot(df, d_bright2,'o',label='Measured response 2 (10dB opt att.)')
-    plt.plot(df, d_dark,'o',label='Measured dark')
-    plt.plot(df, d_SA,'o',label='SA floor')
+    plt.plot(df, d_dark,'ko',label='2022-11 Measured dark')
+    plt.plot(df, d_SA,'mo',label='2022-11 SA floor')
+    
+    d = numpy.genfromtxt('measurement_data/OPA818_FD80FC_5k1.csv',comments='#',delimiter=',')
+    df = d.T[0]
+    d_SA = d.T[2] # spectrum analyzer floor
+    d_dark = d.T[3] # detector dark noise
+    d_bright1 = d.T[1] # detector bright, signal
+    #d_bright2 = d.T[4]
+    
+    # plot measured data and compare to model
+    #plt.figure(figsize=(12,10))
+    plt.plot(df, d_bright1,'r*',label='2021-09 Measured response 1')
+    #plt.plot(df, d_bright2,'o',label='Measured response 2 (10dB opt att.)')
+    plt.plot(df, d_dark,'g*',label='2021-09 Measured dark')
+    plt.plot(df, d_SA,'c*',label='2021-09 SA floor')
+    
     
     plt.plot(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw, termination=True),'-',label='TIASim Dark')
     plt.plot(f, tiasim.v_to_dbm( numpy.sqrt( 4*tiasim.kB*tiasim.T/R_F )*R_F*numpy.ones((len(f),1)) , RBW = rbw),'--',label='RF thermal noise')
     
     # TIAsim bright response
-    for p in 0.6e-6*numpy.logspace(3, 6.5, 5):
+    for p in 0.6e-6*numpy.logspace(3, 9, 11):
         bright = tiasim.v_to_dbm( tia.bright_noise(p, f), RBW = rbw)
         plt.plot(f,bright,label='TIASim P_shot =%.2g W'%(p))
     
