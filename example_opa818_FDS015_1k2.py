@@ -36,6 +36,7 @@ if __name__ == "__main__":
     P = 2e-6
     R_F = 1.2e3
     C_F = .75e-12 # None # None # 0.2e-12
+    C_F = .45e-12
     C_parasitic = 0.01e-12 #0.05e-12
     diode = tiasim.FDS015() #tiasim.S5973()
     opamp = tiasim.OPA818()
@@ -127,6 +128,7 @@ if __name__ == "__main__":
         plt.plot(f,bright,label='TIASim P_shot =%.3g W'%(p))
     
     plt.plot([bw,bw], [-120,-50],  '--', label='f3dB = %.1f MHz' % (bw/1e6))
+    plt.plot([357e6,357e6], [-120,-50],  '--', label='357 MHz' )
     
     plt.xlim((1e6, 2.1e9))
     plt.ylim((-120,-50))

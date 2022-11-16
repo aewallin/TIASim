@@ -161,13 +161,13 @@ if __name__ == "__main__":
 
     plt.plot([25e6, 25e6],[-80, -30],'k--',label='25 MHz EOM frequency')
     
-    plt.xlim((1e5,500e6))
+    plt.xlim((1e5,100e6))
     plt.ylim((-100,-20))
     
     #plt.xlim((10e6,100e6))
     plt.xlabel('Frequency / Hz')
     plt.ylabel('dBm / RBW=%.1g Hz' % rbw)
-    plt.title('S5793 photodiode, OPA657 38kOhm TIA, 10 V/V postgain')
+    plt.title('S5793 photodiode, OPA818 38kOhm TIA (Cf+Cp=0.17 pF), 10 V/V postgain')
     plt.grid()
     plt.legend()
     plt.xscale('linear')

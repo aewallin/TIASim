@@ -25,7 +25,13 @@ import tiasim
 if __name__ == "__main__":
     
     """
-
+        This example shows data from a photodetector built 2022-10.
+        PCB:            2-stage TIA-board with AC and DC outputs
+        Opamp:          OPA818, with OPA818 postgain (AC-output), and OPA657 postgain (DC-output)
+        Transimpedance: 30 kOhm
+        CF:             0.16 pF (adjusted based on measured spectra)
+        Photodiode:     Thorlabs FGA015
+        Bandwidth:      ca 44 MHz
     """
     P = 10e-6
     R_F = 30e3

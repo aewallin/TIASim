@@ -36,11 +36,12 @@ if __name__ == "__main__":
     P = 2e-6
     R_F = 5.1e3
 
-    C_F = 0.16e-12 # NOTE: no component installed, this is parasitic capacitance due to PCB-traces etc.
+    C_F = 0.16e-12 # NOTE: no component installed, this is parasitic capacitance due to PCB-traces etc. (2021-09 version)
+    C_F = 0.16e-12 # (2022-11 version)
     C_parasitic = 0.0e-12 
     diode = tiasim.FD80FC() 
     opamp = tiasim.OPA818()
-    title = "FD80FC OPA818, RF=5k1, CF=0.16pF, (AW2021-09)"
+    title = "FD80FC OPA818, RF=5k1, CF=0.16pF, (AW2021-09, 2022-11)"
     tia = tiasim.TIA( opamp, diode, R_F, C_F, C_parasitic) 
     f = numpy.logspace(3,9,500)
     bw = tia.bandwidth() # bandwidth estimate
@@ -73,13 +74,14 @@ if __name__ == "__main__":
     plt.grid()
     plt.legend()
     
-    rbw = 10e3 # spectrum analyzer RBW
+    rbw = 30e3 # spectrum analyzer RBW
     # load experimental data
-    d = numpy.genfromtxt('measurement_data/OPA818_FD80FC_5k1.csv',comments='#',delimiter=',')
+    #d = numpy.genfromtxt('measurement_data/OPA818_FD80FC_5k1.csv',comments='#',delimiter=',')
+    d = numpy.genfromtxt('measurement_data/2022-11-16_opa818_fd80fc_5k1.csv',comments='#',delimiter=',')
     df = d.T[0]
-    d_SA = d.T[2] # spectrum analyzer floor
-    d_dark = d.T[3] # detector dark noise
-    d_bright1 = d.T[1] # detector bright, signal
+    d_SA = d.T[1] # spectrum analyzer floor
+    d_dark = d.T[2] # detector dark noise
+    d_bright1 = d.T[3] # detector bright, signal
     #d_bright2 = d.T[4]
     
     # plot measured data and compare to model
@@ -89,11 +91,11 @@ if __name__ == "__main__":
     plt.plot(df, d_dark,'o',label='Measured dark')
     plt.plot(df, d_SA,'o',label='SA floor')
     
-    plt.plot(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw),'-',label='TIASim Dark')
+    plt.plot(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw, termination=True),'-',label='TIASim Dark')
     plt.plot(f, tiasim.v_to_dbm( numpy.sqrt( 4*tiasim.kB*tiasim.T/R_F )*R_F*numpy.ones((len(f),1)) , RBW = rbw),'--',label='RF thermal noise')
     
     # TIAsim bright response
-    for p in 0.6e-6*numpy.logspace(3, 9.0, 7):
+    for p in 0.6e-6*numpy.logspace(3, 6.5, 5):
         bright = tiasim.v_to_dbm( tia.bright_noise(p, f), RBW = rbw)
         plt.plot(f,bright,label='TIASim P_shot =%.2g W'%(p))
     
