@@ -203,14 +203,13 @@ class OPA818():
         
     def voltage_noise(self,f):
         """ amplifier input voltage noise in V/sqrt(Hz) """
-        #return numpy.array(len(f)*[4.8e-9]) # FIG 13
         a0 = 2.0e-9      
         a1 =  400e-9
         return a0+a1/pow(f,0.6) 
         
     def current_noise(self,f):
         """ amplifier input current noise in A/sqrt(Hz) """
-        return 1.0e-12*pow(f,0.8)/pow(28e6,0.8) # numpy.ones((len(f),1))
+        return 1.0e-12*pow(f,0.8)/pow(28e6,0.8) 
     
     def input_capacitance(self):
         cm = 1.9e-12
@@ -245,6 +244,39 @@ class OPA847():
         diff= 2.0e-12
         return cm+diff 
 
+class LTC6268_10():
+    """
+        LTC6268-10
+        4 GHz FET input op amp 
+        low input capacitance 0.45 pF
+        gain >= 10
+        https://www.analog.com/media/en/technical-documentation/data-sheets/626810f.pdf
+    """
+    def __init__(self):
+        self.AOL_gain = pow(10, 59.62/20)  
+        self.AOL_bw = 4000e3
+        self.GBWP = 4.0e9
+        
+    def gain(self,f):
+        """ gain """
+        return  self.AOL_gain / (1.0+ 1j * f/self.AOL_bw ) 
+        
+    def voltage_noise(self,f):
+        """ amplifier input voltage noise in V/sqrt(Hz) """
+        a0 = 4.0e-9      
+        a1 =  100e-9
+        a2 = 1.0e-12
+        return a0+a1/pow(f,0.6) +a2*pow(f/1e3,0.55)
+        
+    def current_noise(self,f):
+        """ amplifier input current noise in A/sqrt(Hz) """
+        return 2.0e-12*pow(f,0.8)/pow(28e6,0.8) 
+    
+    def input_capacitance(self):
+        cm = 0.45e-12
+        diff= 0.1e-12
+        return cm+diff 
+        
 class Photodiode():
     def current(self, P):
         """ photocurrent (A) produced by input optical power P """
@@ -521,6 +553,9 @@ class NonInvertingAmp():
         self.opamp = opamp
         self.Rf = Rf
         self.Rg = Rg
+        self.minimum_gain = 7
+        if self.gain_nominal() < self.minimum_gain:
+            self.Rg = self.Rf/(self.minimum_gain-1.0)
         
     def gain_nominal(self):
         return 1.0+self.Rf/self.Rg
