@@ -1,7 +1,7 @@
 # TIASim
 TIASim - Transimpedance Amplifier Simulation.
 
-For some example designs and comparisons to TIASim see [One Inch Phototdetector](https://github.com/aewallin/One-Inch-Photodetector).
+For some example designs and comparisons to TIASim see [One Inch Phototdetector](https://github.com/aewallin/One-Inch-Photodetector) or [Two-stage photodetector](https://github.com/aewallin/Photodetector_2stage_OPA818).
 
 Analog Devices has a Photodiode Circuit Design Wizard at https://tools.analog.com/en/photodiode/
 
