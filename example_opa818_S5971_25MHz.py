@@ -31,12 +31,12 @@ if __name__ == "__main__":
         Transimpedance: 10 kOhm
         Photodiode:     S5973
     """
-    P = 20e-6
-    R_F = 120e3
+    P = 3e-3
+    R_F = 20e3
     C_F =  None # 0.1e-12 # None # 0.1e-12 # None # .6e-12 # None # None # 0.2e-12
     C_parasitic = 0.005e-12
     
-    diode = tiasim.S5973()
+    diode = tiasim.S5971()
     #diode.capacitance = 1.6e-12
     
     opamp = tiasim.OPA818()

@@ -27,12 +27,12 @@ if __name__ == "__main__":
     """
         experimental..
     """
-    P = 1
-    R_F = 30e3
+    P = 10e-6
+    R_F = 33e3
     C_F = None # 0.6e-12
-    C_parasitic = 0.0005e-12
+    C_parasitic = 0.15e-12
     
-    diode1 = tiasim.FDS015()
+    diode1 = tiasim.S5973()
     opamp1 = tiasim.OPA818()
     tia1 = tiasim.TIA( opamp1, diode1, R_F  , C_F, C_parasitic) 
 
