@@ -216,6 +216,39 @@ class OPA818():
         diff= 0.5e-12
         return cm+diff 
 
+class OPA814():
+    """
+        OPA814 600-MHz, High-Precision, Unity-Gain Stable, FET-Input Operational Amplifier
+        https://www.ti.com/product/OPA814    
+    """
+    def __init__(self):
+        self.AOL_gain = pow(10,101.7/20.0) 
+        self.AOL_bw = 2.559e3
+        self.AOL_pole = 800e6
+        self.GBWP = 250e6
+        
+    def gain(self,f):
+        """ gain """
+        return  self.AOL_gain / (1.0+ 1j * f/self.AOL_bw ) * (1.0/ (1.0+ 1j * f/self.AOL_pole ) )
+        
+    def voltage_noise(self,f):
+        """ amplifier input voltage noise in V/sqrt(Hz) """
+        # [5.13696551e-09 2.93314437e-07]
+        a0 = 5.13696551e-09      
+        a1 =  2.93314437e-07
+        return a0+a1/pow(f,0.6) 
+        
+    def current_noise(self,f):
+        """ amplifier input current noise in A/sqrt(Hz) """
+        inoise = 4.80479834e-20
+        return inoise*f
+    
+    def input_capacitance(self):
+        cm = 2.5e-12
+        diff= 0.2e-12
+        return cm+diff 
+
+
 class OPA847():
     """
         3.8GHz GBWP  Ultra-Low Noise, Voltage-Feedback, Bipolar Input 
