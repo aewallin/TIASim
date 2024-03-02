@@ -20,9 +20,11 @@ Open-loop gain, input-referred voltage and current noise, and input-capacitance 
 
 | Op-amp        | Input           | Bandwidth | Inp Capacitance | Supply Voltage  |
 | ------------- | -------------   | --------- | --------------- | --------------- |
+| OPA814        | FET             |  0.6 GHz  | 2.7 pF (2.5pF cm, 0.2 pF diff)         | 12.6 V            |
+| OPA817        | FET             |  0.4 GHz  | 3.0 pF (2.9pF cm, 0.1 pF diff)         | 12.6 V            |
 | OPA657        | FET             |  1.6 GHz  | 5.2 pF          | 13 V            |
 | OPA859        | FET             |  1.8 GHz  | 0.8 pF          | 5 V             |
-| OPA818        | FET             |  2.7 GHz  | 2.4 pF          | 13 V            |
+| OPA818        | FET             |  2.7 GHz  | 2.4 pF  (1.9pF cm, 0.5pF diff)        | 13 V            |
 | OPA847        | BJT             |  3.9 GHz  | 3.7 pF          | 13 V            |
 | OPA858        | FET             |  5.5 GHz  | 0.8 pF          | 5 V             |
 | OPA855        | BJT             |  8 GHz    | 0.8 pF          | 5 V             |

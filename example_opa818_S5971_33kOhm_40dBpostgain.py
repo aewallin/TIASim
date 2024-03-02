@@ -25,7 +25,8 @@ import tiasim
 if __name__ == "__main__":
     
     """
-
+        High AC-gain detector for 422nm Rubidium Modulation Transfer Spectroscopy setup
+        AW2023-09 
     """
     P = 1e-3
     R_F = 33e3
@@ -34,17 +35,6 @@ if __name__ == "__main__":
     
     diode = tiasim.S5971()
     diode.responsivity=0.15 # for 422nm
-        
-    #opamp = tiasim.OPA657()
-    #opamp.AOL_gain = pow(10,70.0/20.0) # NOTE: modify to make it fit data!?
-    # this could be because of capacitive load on the output??
-    # MMCX connector on PCB, followed by ca 150mm thin coax, to SMA-connector.    
-    #tia2 = tiasim.TIA( opamp, diode, R_F  , C_F, C_parasitic) 
-    
-    ## new detector with OPA818
-    #RF2 = 33e3
-    #CF2 = 0.15e-12
-    #CP2 = 0.02e-12
     tia = tiasim.TIA( tiasim.OPA818(), diode, R_F, C_F, C_parasitic)
     
     
@@ -59,17 +49,16 @@ if __name__ == "__main__":
     bw = tia.bandwidth() # bandwidth
     zm = numpy.abs( tia.ZM(f) ) # transimpedance
     
-    # load experimental data, old OPA857 detector
+    # load experimental data
+    # NOTE: use Detector Mode: Sample on Spectrum Analyzer
     d = numpy.genfromtxt('measurement_data/2023-09-22_opa818_s5791_33kohm_40dbpostgain.csv',comments='#',delimiter=',')
     df = d.T[0]
     d_bright = d.T[3]
     d_bright2 = d.T[1]
     d_dark = d.T[2]
     d_sa = d.T[4]
-    
+    rbw = 30e3 # SA resolution bandwidth
 
- 
-    
     print( "P optical ", P*1e6 , " uW")
     print( "Photocurrent ", P*diode.responsivity, " uA")
     print( "DC signal ", R_F*P*diode.responsivity, " V")
@@ -77,8 +66,8 @@ if __name__ == "__main__":
     print( "I shot %.2g A/sqrt(Hz)" % (numpy.sqrt(diode.responsivity*P*tiasim.q*2.0)))
     print( "R_F voltage ", tia.dc_output(P,100e3))
     print( "Bandwidth ", bw/1e6, " MHz")
- 
     print( "simple bw model ", tia.bandwidth_approx()/1e6, " MHz")
+    print( "Postgain %.1f V/V = %.1f dB "% (numpy.abs(ni.gain(100e3)), 20*numpy.log10( numpy.abs(ni.gain(100e3)))) )
 
 
     # transimpedance plot
@@ -141,22 +130,12 @@ if __name__ == "__main__":
     plt.plot(df, d_dark,'.',label='bright, DC-output ca 0.5 V')
     plt.plot(df, d_sa,'.',label='SA floor')
        
-    #plt.plot(df, d_sa,'o',label='Measured SA floor')
-
-    rbw = 30e3
-    # 10 V/V voltage-gain = 20 dB power gain
-    #plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw)+postgain_db,'-',label='OPA657/38kOhm TIASim Dark')
-
-    #r = RF2 / R_F
-    #r_dB = 0 # 20*numpy.log10( r )
     plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f)*numpy.abs(ni.gain(f)), RBW = rbw),'-.',label='OPA818 TIASim Dark')
 
     
     for p in 1e-6*numpy.array([10,100, 0.5e5, 0.5e6]):
         bright = tiasim.v_to_dbm( tia.bright_noise(p, f)*numpy.abs(ni.gain(f)), RBW = rbw)
-        #bright2 = tiasim.v_to_dbm( tia2.bright_noise(p, f), RBW = rbw)+postgain_db
         plt.plot(f,bright,label='OPA818 detector, TIASim P_shot =%.3g W'%(p))
-        #plt.plot(f,bright2,'-.',label='TIASim P_shot =%.3g W'%(p))
     
     # johnson_noise(self, f)
     jn = tiasim.v_to_dbm( tia.johnson_noise(f)*numpy.abs(ni.gain(f)), RBW = rbw)
@@ -186,8 +165,8 @@ if __name__ == "__main__":
        
     #plt.plot(df, d_sa,'o',label='Measured SA floor')
 
-    rbw = 30e3
-    postgain_db = 21 # 10 V/V voltage-gain = 20 dB power gain
+    #rbw = 30e3
+    #postgain_db = 21 # 10 V/V voltage-gain = 20 dB power gain
     #plt.semilogx(f, tiasim.v_to_dbm( tia.bright_noise(0, f), RBW = rbw)+postgain_db,'-',label='OPA657/38kOhm TIASim Dark')
 
     #r = RF2 / R_F
@@ -206,7 +185,7 @@ if __name__ == "__main__":
     plt.semilogx(f,jn,'-',label='RF Johnson noise')
 
     
-    plt.semilogx([25e6, 25e6],[-80, -30],'k--',label='25 MHz EOM frequency')
+    #plt.semilogx([25e6, 25e6],[-80, -30],'k--',label='25 MHz EOM frequency')
     
     plt.xlim((1e5,500e6))
     plt.ylim((-65,10))
@@ -245,12 +224,13 @@ if __name__ == "__main__":
     amp_i = tiasim.v_to_dbm( tia.amp_current_noise(f)*numpy.abs(ni.gain(f)), RBW = rbw)
     plt.semilogx(f,amp_i,'-',label='OpAmp Current noise')
     
-    plt.grid()
+    plt.grid(which='both')
     plt.legend()
     plt.ylim((-70,10))
     plt.xlim((1e5,100e6))
     plt.xlabel('Frequency / Hz')
-    plt.ylabel('dBm / RBW=%.1g Hz' % rbw)
+    plt.ylabel('Output-referred noise, dBm / RBW = %.0f kHz' % (rbw/1e3))
+    plt.title('2023-09 High-gain detector for Rb Modulation Transfer Spectroscopy\nOPA818, S5791, RF 33 kOhm, CF 0.22 pF, 40dB postgain. Ca 20 MHz bandwidth.')
     plt.show()
 
 """
